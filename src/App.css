@@ -93,3 +93,15 @@ input {
 .suggestions li:not(:last-of-type) {
   border-bottom: 1px solid #999;
 }
+
+table{
+  text-align: left;
+}
+
+svg {
+  stroke: #fff;
+}
+  svg path[aria-current='true'] {
+    fill: #a82b2b;
+    outline: none;
+  }
