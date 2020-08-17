@@ -2,14 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import { NavigationBar, MainSearch } from './index.jsx';
+import { NavigationBar, MainSearch, MakeRequest} from './index.jsx';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <React.StrictMode>
     <NavigationBar/>
     <MainSearch/>
-    {/* <JsxTest /> */}
   </React.StrictMode>,
   document.getElementById('root')
 );
