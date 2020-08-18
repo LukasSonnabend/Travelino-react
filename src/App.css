@@ -1,5 +1,5 @@
 body {
-  background-color: grey;
+  background-color: #2b2b2b;
   color: white;
   position: relative;
 }
@@ -28,7 +28,7 @@ html, body {
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #303030;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -99,8 +99,11 @@ table{
 }
 
 svg {
-  stroke: #fff;
+  stroke: #2b2b2b;
 }
+  svg path{
+    fill: whitesmoke;
+  }
   svg path[aria-current='true'] {
     fill: #a82b2b;
     outline: none;

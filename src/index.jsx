@@ -28,6 +28,7 @@ class MainSearch extends React.Component {
             clicked: "", 
             input: "",
             data: {},
+            showResults: false,
             mockData: {"country":"France","response":{"more":true,"results":[{"id":"Paris","name":"Paris","score":9.9823657869383,"snippet":"The City of Light and one of the most visited places on Earth: romance, cuisine, the Eiffel Tower and a surprising amount of green await you."},{"id":"Strasbourg","name":"Strasbourg","score":8.88961573815986,"snippet":"Known for museums. Recommended places to visit are Strasbourg Cathedral, Palais Rohan and Musée de l’Œuvre Notre-Dame."},{"id":"Nice","name":"Nice","score":8.76918290264111,"snippet":"Known for dinner. Recommended places to visit are MAMAC, Villa Ephrussi de Rothschild and Villa Kerylos."},{"id":"Versailles2C_Yvelines","name":"Versailles","score":8.43516135381981,"snippet":"Known for museums. Recommended places to visit are Palace of Versailles, Hall of Mirrors and Versailles Orangerie."},{"id":"Bordeaux","name":"Bordeaux","score":8.39535923805795,"snippet":"Known for cycling. Recommended places to visit are Bordeaux Cathedral, Miroir d'eau and BETASOM."},{"id":"Lyon","name":"Lyon","score":8.39238444112527,"snippet":"Known for shopping. Recommended places to visit are Esplanade de Fourvière, St Jean Cathedral and Musée des Beaux-Arts de Lyon."},{"id":"Avignon","name":"Avignon","score":8.38060307227538,"snippet":"Known for dinner. Recommended places to visit are Palais des Papes, Pont Saint-Bénézet and Musée du Petit Palais."},{"id":"Marseille","name":"Marseille","score":8.37768668946974,"snippet":"Known for museums. Recommended places to visit are Notre-Dame de la Garde, Château d'If and Marseille Cathedral."},{"id":"Amiens","name":"Amiens","score":8.32163175161971,"snippet":"Known for drinks. Recommended places to visit are Amiens Cathedral, Musée de Picardie and Amiens Synagogue."},{"id":"NC3AEmes","name":"Nîmes","score":8.2520291829197,"snippet":"Known for lunch. Recommended places to visit are Pont du Gard, Arènes de Nîmes and Maison Carrée."}]}}
         };
 
@@ -36,6 +37,7 @@ class MainSearch extends React.Component {
         this.makeMap = this.makeMap.bind(this);
         this.makeRequest = this.makeRequest.bind(this);
         this.handleAutoComplete = this.handleAutoComplete.bind(this);
+        this.resetSearch = this.resetSearch.bind(this);
     }
 
     handleAutoComplete(userInput){
@@ -88,7 +90,7 @@ class MainSearch extends React.Component {
         let url = 'http://127.0.0.1:5000/api/' + this.state.clicked; 
         console.log(url);
         fetch(url, {method: 'get', mode: 'cors'}).then(res => res.json())
-        .then( ( data )  => {this.setState({data: data})}).catch( error => console.log(error))
+        .then( ( data )  => {this.setState({data: data, showResults: true})}).catch( error => console.log(error))
 
     }
 
@@ -110,13 +112,20 @@ class MainSearch extends React.Component {
 
         return JSON.stringify(citiesObj);
     }
+    resetSearch(){
+        this.setState({
+            showResults: false
+        })
+    }
     
     
 
     render(){
         return (
             <div className="justify-content-center">
-                {console.log(this.layerProps)}
+                
+                {/* {console.log(this.layerProps)} */}
+                {!this.state.showResults && <div>
                 <h5>Know where you are going?</h5>
                 {/* <input value={this.state.input} onChange={this.handleChange}/> */}
                 
@@ -126,7 +135,7 @@ class MainSearch extends React.Component {
                 
                 {/* <button id="clear" type="button" className="btn-light" onClick={this.handleChange}>Clear</button> */}
                 <div className="row justify-content-center">
-                    <button type="button" className="btn-light">Search</button>
+                    <button type="button" className="btn btn-light">Search</button>
                 </div>
 
                 <div className="row justify-content-center">
@@ -136,11 +145,17 @@ class MainSearch extends React.Component {
                 </div>
 
                 <p>Search destinations in: {this.determineDestination()}</p>
-                <img src="https://www.countryflags.io/fr/flat/64.png"></img>
-                <br></br>
-                <button className="btn-light" onClick={this.makeRequest}>Go</button>
+                <button className="btn btn-light" onClick={() => this.makeRequest()}>Go</button>
                 {/* <p>{JSON.stringify(this.state.data)}</p> */}
-                <ResultView resultData={this.state.data} country={this.state.clicked}/>
+                </div>
+            }
+                {this.state.showResults && 
+                <div>
+                    <ResultView resultData={this.state.data} country={this.state.clicked}/>
+                    <button className="btn-warning" onClick={() => this.resetSearch()}>Reset Search</button>
+                </div>
+                }
+                
 
                 {/* <p>{this.showCities(this.state.mockData)}</p> */}
             </div>
@@ -165,7 +180,7 @@ class ResultView extends React.Component {
             let pushArr = [];
             pushArr.push(x["results"][result]["name"]);
             //pushArr.push(x["results"][result]["score"]);
-            // pushArr.push(x["response"]["results"][result]["snippet"]);
+            pushArr.push(x["results"][result]["snippet"]);
             topCities.push(pushArr);
         }
     
@@ -173,7 +188,7 @@ class ResultView extends React.Component {
         //     topCities: topCities
         // })
         console.log(topCities.length);
-        if (topCities.length > 1){
+
         //try to export as table
         let table = [];
         let count = 0;
@@ -181,13 +196,13 @@ class ResultView extends React.Component {
             let children = []
             for (let j = 0; j < 2; j++){
                 let city = topCities[count][0]
-            children.push(<td> <a href={"../"+this.props.country.toLowerCase()+"/"+city.toLowerCase()}>{ count+1 + ". " +topCities[count]}</a></td>)
+            children.push(<td> <a href={"../"+this.props.country.toLowerCase()+"/"+city.toLowerCase()} data-toggle="tooltip" title={topCities[count][1]}>{ count+1 + ". " +topCities[count][0]}</a></td>)
                 count++
             }
             table.push(<tr>{children}</tr>);
         }
         return table
-    }
+
 
 
         //return topCities; 
@@ -198,9 +213,10 @@ class ResultView extends React.Component {
     render() {
         return (
                 <div className="SearchResults">
+                    <img src="https://www.countryflags.io/fr/flat/64.png"></img>
                     {/* <button onClick={() => this.cityResults(this.props.resultData)}>Get Cities</button> */}
-                    {this.props.country}
-                    <p>Top Cities</p>
+                    
+                    <p>Top Cities in {this.props.country}</p>
                     {/* {this.state.topCities.map((city) => <p><a href={"../"+this.props.country.toLowerCase()+"/"+city[0].toLowerCase()}>{city[0]}</a> </p>)} */}
                     <div className="row justify-content-center">
                         <div className="col-auto">
@@ -218,54 +234,27 @@ class ResultView extends React.Component {
     }
 }
 
+class Footer extends React.Component{
+    constructor(){
+        super()
+    };
+    render(){
+        return(
+            <footer>
+                <p>Test Footer Text</p>
+            </footer>
+
+        )
+    }
+}
+
 
 
 export{
     NavigationBar,
     //JsxTest,
     MainSearch,
-    ResultView
+    ResultView,
+    Footer
 } 
 
-// class MakeRequest extends React.Component{
-
-//     componentDidMount(){
-//         fetch('https://jsonplaceholder.typicode.com/todos/1').then(res => res.json())
-//         .then(data => 
-//             this.setState({
-//                 data: data
-//             })
-//         )
-//     }
-//     render(){
-//     return <p>{this.state.data}</p>
-//     }
-// }
-
-
-
-// function JsxTest(){
-
-//     const [clicked, setClicked] = React.useState('None');
-//     const layerProps = {
-//         onClick: ({ target }) => setClicked(target.attributes.name.value),
-//       };
-    
-//     return(
-//         <div id="searchComponent">
-//             <h5>Know where you are going?</h5>
-//             <input value={clicked} onChange={clicked}/>
-//             <button type="button" className="btn-light">Search</button>
-//             <br />
-//             <br />
-//             <h5>Explore</h5>
-//             <br />
-//             <VectorMap {...worldLowRes} layerProps={layerProps} style={{width: "90%"}} />
-//             <a href="https://react-vector-maps.netlify.app/maps">Vector Map</a>
-//             <br />
-//             <br />
-//             <p>Clicked: {clicked}</p>
-            
-//         </div>
-//     );
-// }
