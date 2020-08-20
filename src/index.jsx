@@ -3,6 +3,7 @@ import worldLowRes from './worldMap.json';
 import { VectorMap } from '@south-paw/react-vector-maps';
 import countryList from './countries';
 
+
 import Autocomplete from "./Autocomplete";
 
 function NavigationBar(){
@@ -11,7 +12,7 @@ function NavigationBar(){
             <nav className="navbar navbar-dark bg-dark justify-content-center">
                 <ul className="navbar-nav">
                     <li className="nav-item active">
-                        <span style={{fontFamily: "Lobster", fontSize: 40, color: "white"}}>Travelino</span>
+                        <a href="/"> <span style={{fontFamily: "Lobster", fontSize: 40, color: "white"}}>Travelino</span></a>
                     </li>
                 </ul>
             </nav>
@@ -248,6 +249,87 @@ class Footer extends React.Component{
     }
 }
 
+class TripView extends React.Component{
+    constructor(){
+        super()
+    
+    this.state = {
+        country: "",
+        city: "",
+        data: {},
+        locations: []
+    }
+    }
+    componentDidMount(){
+        let city = this.props.city;
+        let country = this.props.country;
+        city = city[0].toUpperCase() + city.substring(1);
+        country = country[0].toUpperCase() + country.substring(1);
+        city = city;
+        country = country;
+        
+        console.log("Running Req function");
+        let url = 'http://192.168.178.199:5000/api/' + country + "/" + city; 
+        console.log(url);
+        fetch(url, {method: 'get', mode: 'cors'}).then(res => res.json())
+        .then( ( data )  => {
+            this.setState({data: data.results})
+            console.log(this.state.data[0]["days"]);
+            let locationArray = this.state.data[0]["days"][0]["itinerary_items"];
+            for (let location in this.state.data[0]["days"][1]["itinerary_items"] ){
+                locationArray.push(this.state.data[0]["days"][1]["itinerary_items"][location])
+            }
+
+            this.setState({
+                country: country,
+                city: city,
+                locations: locationArray
+            })
+    
+        }).catch( error => console.log(error))
+    }
+
+
+
+    render(){
+        return(
+            <div>
+                <h3>{this.state.city}, {this.state.country}</h3>
+
+                <div className="locationCards">
+                    {this.state.locations.map((loc) =>
+                            <div className="card text-white bg-dark mb-3 mx-auto col-10 col-md-8 col-xl-6">
+                                {/* <div className="cardImg mb-3 mx-auto" style={{backgroundImage: "url("+loc.poi.images[0].source_url+")"}}>
+                                    
+                                </div> */}
+                                <img src={loc.poi.images[0].source_url} className="card-img-top" alt={"Picture of " + loc.poi.name}/>
+                                {/* https://stackoverflow.com/questions/11552380/how-to-automatically-crop-and-center-an-image */}
+                                <div className="card-header">
+                                    {loc.poi.name}
+                                    <button className="btn btn-info" type="button" data-toggle="collapse" data-target={"#"+loc.poi.id} aria-expanded="false" aria-controls={loc.poi.id}>ⓘ</button>
+                                    </div>
+                                <div className="card-body">
+                                    
+                                    
+                                    <div className="collapse" id={loc.poi.id}>
+                                        <p className="card-text">{loc.poi.snippet}</p>
+                                        <hr/>
+                                    </div>
+                                    <a target="_blank" rel="noopener noreferrer" href={"https://www.google.com/maps/dir/?api=1&destination=" + loc.poi.name + this.state.city + "+" + this.state.country}><button className="btn btn-primary">Get Directions</button></a>
+                                    {/* https://developers.google.com/maps/documentation/urls/get-started */}
+                                </div>
+                            </div> 
+                            
+                    )}
+                </div>
+
+            {/* {topCities.map((city) => <p><a href={"../"+country.toLowerCase()+"/"+city[0].toLowerCase()}>{city[0]}</a> </p>)} */}
+
+            </div>
+        )
+    }
+}
+
 
 
 export{
@@ -255,6 +337,7 @@ export{
     //JsxTest,
     MainSearch,
     ResultView,
-    Footer
+    Footer,
+    TripView
 } 
 
